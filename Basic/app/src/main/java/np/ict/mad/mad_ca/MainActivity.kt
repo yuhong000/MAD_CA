@@ -8,24 +8,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import np.ict.mad.mad_ca.ui.theme.MAD_CATheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberNavController()
-            val context = LocalContext.current
-            val scoreManager = remember { HighScoreManager(context) }
+            MAD_CATheme {
+                val navController = rememberNavController()
+                val context = LocalContext.current
+                // Initialize the manager here
+                val scoreManager = remember { HighScoreManager(context) }
 
-            NavHost(navController = navController, startDestination = "game") {
-                composable("game") {
-                    GameScreen(
-                        highScoreManager = scoreManager,
-                        onNavigateToSettings = { navController.navigate("settings") }
-                    )
-                }
-                composable("settings") {
-                    SettingsScreen(onBack = { navController.popBackStack() })
+                NavHost(navController = navController, startDestination = "game") {
+                    composable("game") {
+                        GameScreen(
+                            highScoreManager = scoreManager,
+                            onNavigateToSettings = { navController.navigate("settings") }
+                        )
+                    }
+                    composable("settings") {
+                        SettingsScreen(onBack = { navController.popBackStack() })
+                    }
                 }
             }
         }
