@@ -56,13 +56,19 @@ class MainActivity : ComponentActivity() {
                         GameScreen(
                             context = LocalContext.current,
                             currentUserId = userId,
-                            onNavigateToSettings = { navController.navigate("settings") }
+                            onNavigateToSettings = { navController.navigate("settings") },
+                            onNavigateToLeaderboard = { navController.navigate("leaderboard")}
+
                         )
                     }
 
                     // 4. SETTINGS SCREEN
                     composable("settings") {
                         SettingsScreen(onBack = { navController.popBackStack() })
+                    }
+
+                    composable("leaderboard") {
+                        LeaderboardScreen(onBack = { navController.popBackStack() })
                     }
                 }
             }

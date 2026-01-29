@@ -23,11 +23,14 @@ import kotlin.random.Random
 fun GameScreen(
     context: Context,
     currentUserId: Int,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToLeaderboard: () -> Unit 
 ) {
+    //  Database Setup 
     val db = remember { AppDatabase.getDatabase(context) }
     val scope = rememberCoroutineScope()
 
+    //  State Management 
     var score by remember { mutableIntStateOf(0) }
     var timeLeft by remember { mutableIntStateOf(30) }
     var moleIndex by remember { mutableIntStateOf(-1) }
@@ -35,10 +38,12 @@ fun GameScreen(
     var showGameOver by remember { mutableStateOf(false) }
     var personalBest by remember { mutableIntStateOf(0) }
 
+    //  Load Personal Best  
     LaunchedEffect(currentUserId) {
         personalBest = db.appDao().getPersonalBest(currentUserId) ?: 0
     }
 
+    //  Timer
     LaunchedEffect(isRunning) {
         if (isRunning) {
             while (timeLeft > 0) {
@@ -48,7 +53,6 @@ fun GameScreen(
             isRunning = false
             showGameOver = true
             moleIndex = -1
-
 
             scope.launch {
                 val timestamp = Date().time
@@ -60,7 +64,7 @@ fun GameScreen(
         }
     }
 
-    // --- Mole Movement Logic
+    //  Mole Movement
     LaunchedEffect(isRunning) {
         if (isRunning) {
             while (timeLeft > 0) {
@@ -70,9 +74,10 @@ fun GameScreen(
         }
     }
 
-    // --- UI Layout ---
+    //  UI Layout 
     Column(modifier = Modifier.fillMaxSize()) {
 
+        // 1. Top Bar
         Surface(
             shadowElevation = 3.dp,
             modifier = Modifier.fillMaxWidth().height(64.dp),
@@ -83,41 +88,56 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // App Title
                 Text(
                     text = "Wack-a-Mole",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                IconButton(onClick = onNavigateToSettings) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+
+                Row {
+                    // Leaderboard Button
+                    IconButton(onClick = onNavigateToLeaderboard) {
+                        Text("🏆", style = MaterialTheme.typography.titleLarge)
+                    }
+                    // Settings Action Icon
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }
 
+        // 2. Main Game Area
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            // Personal Best Display
             Text(
                 text = "Personal Best: $personalBest",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
 
+            // Score and Time Display
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text("Score: $score", style = MaterialTheme.typography.headlineSmall)
                 Text("Time: $timeLeft", style = MaterialTheme.typography.headlineSmall)
             }
 
+            // 3x3 Grid of Holes
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier.size(320.dp),
@@ -127,6 +147,7 @@ fun GameScreen(
                 items(9) { index ->
                     Button(
                         onClick = {
+
                             if (isRunning && index == moleIndex) {
                                 score++
                                 moleIndex = -1
@@ -148,15 +169,23 @@ fun GameScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Start/Stop Button
             Button(
                 onClick = {
                     if (isRunning) {
-                        score = 0
-                        timeLeft = 0
-                        showGameOver = true
+                        //  STOP GAME
                         isRunning = false
+                        timeLeft = 0
                         moleIndex = -1
-                    }else{
+                        showGameOver = true
+
+                        scope.launch {
+                            val timestamp = Date().time
+                            db.appDao().insertScore(currentUserId, score, timestamp)
+                            if (score > personalBest) personalBest = score
+                        }
+                    } else {
+                        //  START GAME
                         score = 0
                         timeLeft = 30
                         showGameOver = false
@@ -169,7 +198,7 @@ fun GameScreen(
                 Text(if (isRunning) "Stop Game" else "Start Game")
             }
 
-
+            // Game Over Indication
             if (showGameOver) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
