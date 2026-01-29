@@ -10,6 +10,9 @@ interface AppDao {
     @Insert
     suspend fun insertUser(user: User): Long
 
+    @Query("SELECT * FROM users WHERE userId = :userId")
+    suspend fun getUser(userId: Int): User?
+
     @Query("SELECT * FROM users WHERE username = :username AND password = :password LIMIT 1")
     suspend fun login(username: String, password: String): User?
 
@@ -17,7 +20,7 @@ interface AppDao {
     suspend fun insertScore(userId: Int, score: Int, timestamp: Long)
 
     @Query("""
-        SELECT u.username, MAX(s.score) as maxScore 
+        SELECT u.userId,u.username, MAX(s.score) as maxScore 
         FROM users u 
         INNER JOIN scores s ON u.userId = s.userId 
         GROUP BY u.userId 
@@ -31,6 +34,7 @@ interface AppDao {
 
 // Helper class for the leaderboard result
 data class LeaderboardEntry(
+    val userId: Int,
     val username: String,
     val maxScore: Int
 )

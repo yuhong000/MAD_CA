@@ -56,19 +56,37 @@ class MainActivity : ComponentActivity() {
                         GameScreen(
                             context = LocalContext.current,
                             currentUserId = userId,
-                            onNavigateToSettings = { navController.navigate("settings") },
-                            onNavigateToLeaderboard = { navController.navigate("leaderboard")}
-
+                            onNavigateToSettings = { navController.navigate("settings/$userId") },
+                            onNavigateToLeaderboard = { navController.navigate("leaderboard/$userId") }
                         )
                     }
 
                     // 4. SETTINGS SCREEN
-                    composable("settings") {
-                        SettingsScreen(onBack = { navController.popBackStack() })
+                    composable(
+                        route = "settings/{userId}",
+                        arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val userId = backStackEntry.arguments?.getInt("userId") ?: 0
+                        SettingsScreen(
+                            currentUserId = userId,
+                            onLogout = {
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            },
+                            onBack = { navController.popBackStack() }
+                        )
                     }
 
-                    composable("leaderboard") {
-                        LeaderboardScreen(onBack = { navController.popBackStack() })
+                    composable(
+                        route = "leaderboard/{userId}",
+                        arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val userId = backStackEntry.arguments?.getInt("userId") ?: 0
+                        LeaderboardScreen(
+                            currentUserId = userId,
+                            onBack = { navController.popBackStack() }
+                        )
                     }
                 }
             }
