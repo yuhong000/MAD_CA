@@ -24,6 +24,9 @@ interface AppDao {
         ORDER BY maxScore DESC
     """)
     suspend fun getLeaderboard(): List<LeaderboardEntry>
+
+    @Query("SELECT MAX(score) FROM scores WHERE userId = :userId")
+    suspend fun getPersonalBest(userId: Int): Int?
 }
 
 // Helper class for the leaderboard result
