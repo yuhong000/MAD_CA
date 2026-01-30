@@ -24,13 +24,13 @@ fun GameScreen(
     context: Context,
     currentUserId: Int,
     onNavigateToSettings: () -> Unit,
-    onNavigateToLeaderboard: () -> Unit 
+    onNavigateToLeaderboard: () -> Unit
 ) {
-    //  Database Setup 
+    //  Database Setup
     val db = remember { AppDatabase.getDatabase(context) }
     val scope = rememberCoroutineScope()
 
-    //  State Management 
+    //  State Management
     var score by remember { mutableIntStateOf(0) }
     var timeLeft by remember { mutableIntStateOf(30) }
     var moleIndex by remember { mutableIntStateOf(-1) }
@@ -38,7 +38,7 @@ fun GameScreen(
     var showGameOver by remember { mutableStateOf(false) }
     var personalBest by remember { mutableIntStateOf(0) }
 
-    //  Load Personal Best  
+    //  Load Personal Best
     LaunchedEffect(currentUserId) {
         personalBest = db.appDao().getPersonalBest(currentUserId) ?: 0
     }
@@ -74,7 +74,7 @@ fun GameScreen(
         }
     }
 
-    //  UI Layout 
+    //  UI Layout
     Column(modifier = Modifier.fillMaxSize()) {
 
         // 1. Top Bar
@@ -147,7 +147,6 @@ fun GameScreen(
                 items(9) { index ->
                     Button(
                         onClick = {
-
                             if (isRunning && index == moleIndex) {
                                 score++
                                 moleIndex = -1
@@ -169,7 +168,7 @@ fun GameScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Start/Stop Button
+            //  Start/Stop Button
             Button(
                 onClick = {
                     if (isRunning) {
@@ -193,7 +192,10 @@ fun GameScreen(
                         moleIndex = -1
                     }
                 },
-                modifier = Modifier.fillMaxWidth(0.6f)
+                modifier = Modifier.fillMaxWidth(0.6f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isRunning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
             ) {
                 Text(if (isRunning) "Stop Game" else "Start Game")
             }
