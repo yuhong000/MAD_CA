@@ -27,27 +27,11 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("game/$userId") {
                                     popUpTo("login") { inclusive = true }
                                 }
-                            },
-                            onNavigateToSignUp = {
-                                navController.navigate("signup")
                             }
                         )
                     }
 
-                    composable("signup") {
-                        SignUpScreen(
-                            onSignUpSuccess = { userId ->
-                                navController.navigate("game/$userId") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            },
-                            onNavigateBack = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
-
-                    // 3. GAME SCREEN
+                    // 2. GAME SCREEN
                     composable(
                         route = "game/{userId}",
                         arguments = listOf(navArgument("userId") { type = NavType.IntType })
@@ -61,7 +45,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // 4. SETTINGS SCREEN
+                    // 3. SETTINGS SCREEN
                     composable(
                         route = "settings/{userId}",
                         arguments = listOf(navArgument("userId") { type = NavType.IntType })
@@ -78,6 +62,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    // 4. LEADERBOARD SCREEN
                     composable(
                         route = "leaderboard/{userId}",
                         arguments = listOf(navArgument("userId") { type = NavType.IntType })

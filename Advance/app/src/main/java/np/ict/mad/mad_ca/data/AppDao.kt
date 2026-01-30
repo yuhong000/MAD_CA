@@ -16,6 +16,9 @@ interface AppDao {
     @Query("SELECT * FROM users WHERE username = :username AND password = :password LIMIT 1")
     suspend fun login(username: String, password: String): User?
 
+    @Query("SELECT EXISTS(SELECT 1 FROM users WHERE username = :username)")
+    suspend fun isUsernameTaken(username: String): Boolean
+
     @Query("INSERT INTO scores (userId, score, timestamp) VALUES (:userId, :score, :timestamp)")
     suspend fun insertScore(userId: Int, score: Int, timestamp: Long)
 
